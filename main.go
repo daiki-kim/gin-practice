@@ -4,12 +4,14 @@ import (
 	"github.com/gin-gonic/gin"
 
 	"gin-practice-api/controllers"
+	"gin-practice-api/infra"
 	"gin-practice-api/models"
 	"gin-practice-api/repositories"
 	"gin-practice-api/services"
 )
 
 func main() {
+	infra.Initialize()
 	items := []models.Item{
 		{ID: 1, Name: "item1", Price: 100, Description: "first item", SoldOut: false},
 		{ID: 2, Name: "item2", Price: 200, Description: "second item", SoldOut: true},
