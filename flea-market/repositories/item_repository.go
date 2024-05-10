@@ -88,14 +88,22 @@ func (i *ItemRepository) Delete(itemId uint) error {
 	panic("unimplemented")
 }
 
-// FindAll implements IItemRepository.
-func (i *ItemRepository) FindAll() (*[]models.Item, error) {
-	panic("unimplemented")
+func (r *ItemRepository) FindAll() (*[]models.Item, error) {
+	var items []models.Item
+	result := r.items.Find(&items)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &items, nil
 }
 
-// FindById implements IItemRepository.
-func (i *ItemRepository) FindById(itemId uint) (*models.Item, error) {
-	panic("unimplemented")
+func (r *ItemRepository) FindById(itemId uint) (*models.Item, error) {
+	var item models.Item
+	result := r.items.First(&item, itemId) //First(dest, conds): のdestに構造体、condsに欲しいデータのprimary keyを指定する
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &item, nil
 }
 
 // Update implements IItemRepository.
