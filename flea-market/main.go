@@ -5,30 +5,33 @@ import (
 
 	"flea-market/controllers"
 	"flea-market/infra"
-	"flea-market/models"
+
+	// "flea-market/models"
 	"flea-market/repositories"
 	"flea-market/services"
 )
 
 func main() {
 	infra.Initialize()
-	items := []models.Item{
-		{ID: 1, Name: "item1", Price: 100, Description: "first item", SoldOut: false},
-		{ID: 2, Name: "item2", Price: 200, Description: "second item", SoldOut: true},
-		{ID: 3, Name: "item3", Price: 300, Description: "third item", SoldOut: false},
-	}
+	db := infra.SetupDB()
+	// items := []models.Item{
+	// 	{ID: 1, Name: "item1", Price: 100, Description: "first item", SoldOut: false},
+	// 	{ID: 2, Name: "item2", Price: 200, Description: "second item", SoldOut: true},
+	// 	{ID: 3, Name: "item3", Price: 300, Description: "third item", SoldOut: false},
+	// }
 
-	IItemMemoryRepository := repositories.NewItemMemoryRepository(items)
-	IItemService := services.NewItemService(IItemMemoryRepository)
-	IItemController := controllers.NewItemController(IItemService)
+	// IItemMemoryRepository := repositories.NewItemMemoryRepository(items)
+	itemRepository := repositories.NewItemRepository(db)
+	itemService := services.NewItemService(itemRepository)
+	itemController := controllers.NewItemController(itemService)
 
-	router := gin.Default()
+	r := gin.Default()
+	router := r.Group("/items")
+	router.GET("", itemController.FindAll)
+	router.GET("/:id", itemController.FindById)
+	router.POST("", itemController.Create)
+	router.PUT("/:id", itemController.Update)
+	router.DELETE("/:id", itemController.Delete)
 
-	router.GET("/items", IItemController.FindAll)
-	router.GET("/items/:id", IItemController.FindById)
-	router.POST("/items", IItemController.Create)
-	router.PUT("/items/:id", IItemController.Update)
-	router.DELETE("/items/:id", IItemController.Delete)
-
-	router.Run("localhost:8080")
+	r.Run("localhost:8080")
 }

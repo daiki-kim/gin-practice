@@ -15,6 +15,9 @@ type IItemRepository interface {
 	Delete(itemId uint) error
 }
 
+/*
+ItemMemoryRepository
+*/
 type ItemMemoryRepository struct {
 	items []models.Item
 }
@@ -61,6 +64,9 @@ func (r *ItemMemoryRepository) Delete(deleteItemId uint) error {
 	return errors.New("item not found")
 }
 
+/*
+ItemRepository
+*/
 type ItemRepository struct {
 	items *gorm.DB
 }
@@ -69,9 +75,12 @@ func NewItemRepository(items *gorm.DB) IItemRepository {
 	return &ItemRepository{items: items}
 }
 
-// Create implements IItemRepository.
-func (i *ItemRepository) Create(newItem models.Item) (*models.Item, error) {
-	panic("unimplemented")
+func (r *ItemRepository) Create(newItem models.Item) (*models.Item, error) {
+	result := r.items.Create(&newItem)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &newItem, nil
 }
 
 // Delete implements IItemRepository.

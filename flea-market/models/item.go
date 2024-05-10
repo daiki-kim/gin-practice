@@ -1,7 +1,8 @@
 package models
 
-// import "gorm.io/gorm"
+import "gorm.io/gorm"
 
+/*
 // for ItemMemoryRepository
 type Item struct {
 	ID          uint   `json:"id"`
@@ -10,12 +11,13 @@ type Item struct {
 	Description string `json:"description"`
 	SoldOut     bool   `json:"soldOut"`
 }
+*/
 
-// // for ItemRepository
-// type Item struct {
-// 	gorm.Model
-// 	Name        string `gorm:"not null"`
-// 	Price       uint   `gorm:"not null"`
-// 	Description string
-// 	SoldOut     bool `gorm:"not null; default:false"`
-// }
+// for ItemRepository
+type Item struct {
+	gorm.Model
+	Name        string `gorm:"not null"`
+	Price       uint   `gorm:"not null"`
+	Description string
+	SoldOut     bool `gorm:"not null; default:false"`
+}
