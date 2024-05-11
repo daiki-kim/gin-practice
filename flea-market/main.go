@@ -25,13 +25,21 @@ func main() {
 	itemService := services.NewItemService(itemRepository)
 	itemController := controllers.NewItemController(itemService)
 
+	authRepository := repositories.CreateNewAuthRepository(db)
+	authService := services.CreateNewAuthService(authRepository)
+	authController := controllers.NewAuthController(authService)
+
 	r := gin.Default()
-	router := r.Group("/items")
-	router.GET("", itemController.FindAll)
-	router.GET("/:id", itemController.FindById)
-	router.POST("", itemController.Create)
-	router.PUT("/:id", itemController.Update)
-	router.DELETE("/:id", itemController.Delete)
+
+	itemRouter := r.Group("/items")
+	itemRouter.GET("", itemController.FindAll)
+	itemRouter.GET("/:id", itemController.FindById)
+	itemRouter.POST("", itemController.Create)
+	itemRouter.PUT("/:id", itemController.Update)
+	itemRouter.DELETE("/:id", itemController.Delete)
+
+	authRouter := r.Group("/auth")
+	authRouter.POST("", authController.Signup)
 
 	r.Run("localhost:8080")
 }
