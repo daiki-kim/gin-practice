@@ -4,6 +4,7 @@ import (
 	"errors"
 	"flea-market/models"
 	"flea-market/repositories"
+	"fmt"
 	"os"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 type IAuthService interface {
 	SignUp(email string, password string) error // dtoの構造体よりフィールドを入れる方が読みやすい
 	LogIn(email string, password string) (*string, error)
+	GetUserFromToken(tokenString string) (*models.User, error)
 }
 
 type AuthService struct {
@@ -61,4 +63,29 @@ func CreateToken(userId uint, email string) (*string, error) {
 		return nil, err
 	}
 	return &tokenString, nil
+}
+
+func (s *AuthService) GetUserFromToken(tokenString string) (*models.User, error) {
+	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return []byte(os.Getenv("SECLET_KEY")), nil
+	})
+	if err != nil {
+		return nil, err
+	}
+
+	var user *models.User
+	if claims, ok := token.Claims.(jwt.MapClaims); ok {
+		if float64(time.Now().Unix()) > claims["exp"].(float64) {
+			return nil, jwt.ErrTokenExpired
+		}
+
+		user, err = s.repository.FindUserByEmail(claims["email"].(string))
+		if err != nil {
+			return nil, err
+		}
+	}
+	return user, nil
 }
