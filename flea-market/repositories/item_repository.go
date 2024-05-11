@@ -83,9 +83,16 @@ func (r *ItemRepository) Create(newItem models.Item) (*models.Item, error) {
 	return &newItem, nil
 }
 
-// Delete implements IItemRepository.
-func (i *ItemRepository) Delete(itemId uint) error {
-	panic("unimplemented")
+func (r *ItemRepository) Delete(itemId uint) error {
+	item, err := r.FindById(itemId)
+	if err != nil {
+		return err
+	}
+	result := r.items.Delete(&item)
+	if result.Error != nil {
+		return result.Error
+	}
+	return nil
 }
 
 func (r *ItemRepository) FindAll() (*[]models.Item, error) {
@@ -101,7 +108,7 @@ func (r *ItemRepository) FindById(itemId uint) (*models.Item, error) {
 	var item models.Item
 	result := r.items.First(&item, itemId) //First(dest, conds): のdestに構造体、condsに欲しいデータのprimary keyを指定する
 	if result.Error != nil {
-		return nil, result.Error
+		return nil, errors.New("item not found")
 	}
 	return &item, nil
 }
