@@ -39,7 +39,8 @@ func main() {
 	itemRouter.DELETE("/:id", itemController.Delete)
 
 	authRouter := r.Group("/auth")
-	authRouter.POST("", authController.SignUp)
+	authRouter.POST("/sinup", authController.SignUp)
+	authRouter.POST("/login", authController.LogIn)
 
 	r.Run("localhost:8080")
 }

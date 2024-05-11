@@ -8,6 +8,7 @@ import (
 
 type IAuthRepository interface {
 	CreateUser(newUser models.User) error // repositoriesではSigninよりCreateUserの方がわかりやすい
+	FindUserByEmail(email string) (*models.User, error)
 }
 
 type AuthRepository struct {
@@ -24,4 +25,13 @@ func (r *AuthRepository) CreateUser(newUser models.User) error {
 		return result.Error
 	}
 	return nil
+}
+
+func (r *AuthRepository) FindUserByEmail(email string) (*models.User, error) {
+	var foundUser models.User
+	result := r.db.First(&foundUser, "email = ?", email)
+	if result.Error != nil {
+		return nil, result.Error
+	}
+	return &foundUser, nil
 }
