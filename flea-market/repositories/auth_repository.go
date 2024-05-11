@@ -7,21 +7,21 @@ import (
 )
 
 type IAuthRepository interface {
-	Signup(newUser models.User) (*models.User, error)
+	CreateUser(newUser models.User) error // repositoriesではSigninよりCreateUserの方がわかりやすい
 }
 
 type AuthRepository struct {
-	users *gorm.DB
+	db *gorm.DB
 }
 
-func CreateNewAuthRepository(users *gorm.DB) IAuthRepository {
-	return &AuthRepository{users: users}
+func NewAuthRepository(db *gorm.DB) IAuthRepository {
+	return &AuthRepository{db: db}
 }
 
-func (r *AuthRepository) Signup(newUser models.User) (*models.User, error) {
-	result := r.users.Create(&newUser)
+func (r *AuthRepository) CreateUser(newUser models.User) error {
+	result := r.db.Create(&newUser)
 	if result.Error != nil {
-		return nil, result.Error
+		return result.Error
 	}
-	return &newUser, nil
+	return nil
 }

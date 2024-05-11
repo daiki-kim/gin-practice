@@ -25,8 +25,8 @@ func main() {
 	itemService := services.NewItemService(itemRepository)
 	itemController := controllers.NewItemController(itemService)
 
-	authRepository := repositories.CreateNewAuthRepository(db)
-	authService := services.CreateNewAuthService(authRepository)
+	authRepository := repositories.NewAuthRepository(db)
+	authService := services.NewAuthService(authRepository)
 	authController := controllers.NewAuthController(authService)
 
 	r := gin.Default()
@@ -39,7 +39,7 @@ func main() {
 	itemRouter.DELETE("/:id", itemController.Delete)
 
 	authRouter := r.Group("/auth")
-	authRouter.POST("", authController.Signup)
+	authRouter.POST("", authController.SignUp)
 
 	r.Run("localhost:8080")
 }
