@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"log"
 	"net/http"
 	"net/http/httptest"
@@ -13,8 +14,10 @@ import (
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
 
+	"flea-market/dto"
 	"flea-market/infra"
 	"flea-market/models"
+	"flea-market/services"
 )
 
 func TestMain(m *testing.M) { // "Test~()"がテスト関数として認識される
@@ -56,6 +59,9 @@ func setup() *gin.Engine {
 	return router
 }
 
+/*
+tests without authorization
+*/
 func TestFindAll(t *testing.T) {
 	router := setup()
 
@@ -70,4 +76,74 @@ func TestFindAll(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, 3, len(res["data"]))
+}
+
+/*
+tests with authorization
+*/
+func TestFindById(t *testing.T) {
+	router := setup()
+
+	token, err := services.CreateToken(1, "test1@example.com")
+	assert.Equal(t, nil, err)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("GET", "/items/1", nil)
+	req.Header.Set("Authorization", "Bearer "+*token)
+	router.ServeHTTP(w, req)
+
+	var res map[string]models.Item
+	json.Unmarshal([]byte(w.Body.String()), &res)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, "test item 1", res["data"].Name)
+}
+
+func TestCreate(t *testing.T) {
+	router := setup()
+
+	token, err := services.CreateToken(1, "test1@example.com")
+	assert.Equal(t, nil, err)
+
+	itemInput := dto.CreateItemInput{
+		Name:        "test item 4",
+		Price:       4000,
+		Description: "testing Create()",
+	}
+	reqestBody, _ := json.Marshal(itemInput)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/items", bytes.NewBuffer(reqestBody))
+	req.Header.Set("Authorization", "Bearer "+*token)
+	router.ServeHTTP(w, req)
+
+	var res map[string]models.Item
+	json.Unmarshal([]byte(w.Body.String()), &res)
+
+	assert.Equal(t, http.StatusCreated, w.Code)
+	assert.Equal(t, uint(4), res["data"].ID)
+}
+
+/*
+error tests
+*/
+func TestCreateUnauthorized(t *testing.T) {
+	router := setup()
+
+	itemInput := dto.CreateItemInput{
+		Name:        "test item 4",
+		Price:       4000,
+		Description: "testing Create()",
+	}
+	reqestBody, _ := json.Marshal(itemInput)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/items", bytes.NewBuffer(reqestBody))
+
+	router.ServeHTTP(w, req)
+
+	var res map[string]models.Item
+	json.Unmarshal([]byte(w.Body.String()), &res)
+
+	assert.Equal(t, http.StatusUnauthorized, w.Code)
 }
