@@ -8,10 +8,10 @@ import (
 
 type IItemService interface {
 	FindAll() (*[]models.Item, error)
-	FindById(itemId uint) (*models.Item, error)
-	Create(newItemInput dto.CreateItemInput) (*models.Item, error)
-	Update(updateItemInput dto.UpdateItemInput, itemId uint) (*models.Item, error)
-	Delete(deleteItemId uint) error
+	FindById(itemId uint, userId uint) (*models.Item, error)
+	Create(newItemInput dto.CreateItemInput, userId uint) (*models.Item, error)
+	Update(updateItemInput dto.UpdateItemInput, itemId uint, userId uint) (*models.Item, error)
+	Delete(deleteItemId uint, userId uint) error
 }
 
 type ItemService struct {
@@ -26,22 +26,23 @@ func (s *ItemService) FindAll() (*[]models.Item, error) {
 	return s.repository.FindAll()
 }
 
-func (s *ItemService) FindById(itemId uint) (*models.Item, error) {
-	return s.repository.FindById(itemId)
+func (s *ItemService) FindById(itemId uint, userId uint) (*models.Item, error) {
+	return s.repository.FindById(itemId, userId)
 }
 
-func (s *ItemService) Create(newItemInput dto.CreateItemInput) (*models.Item, error) {
+func (s *ItemService) Create(newItemInput dto.CreateItemInput, userId uint) (*models.Item, error) {
 	newItem := models.Item{
 		Name:        newItemInput.Name,
 		Price:       newItemInput.Price,
 		Description: newItemInput.Description,
 		SoldOut:     false,
+		UserID:      userId,
 	}
 	return s.repository.Create(newItem)
 }
 
-func (s *ItemService) Update(updateItemInput dto.UpdateItemInput, updataItemId uint) (*models.Item, error) {
-	targetItem, err := s.FindById(updataItemId)
+func (s *ItemService) Update(updateItemInput dto.UpdateItemInput, updataItemId uint, userId uint) (*models.Item, error) {
+	targetItem, err := s.FindById(updataItemId, userId)
 	if err != nil {
 		return nil, err
 	}
@@ -60,6 +61,6 @@ func (s *ItemService) Update(updateItemInput dto.UpdateItemInput, updataItemId u
 	return s.repository.Update(*targetItem)
 }
 
-func (s *ItemService) Delete(deleteItemId uint) error {
-	return s.repository.Delete(deleteItemId)
+func (s *ItemService) Delete(deleteItemId uint, userId uint) error {
+	return s.repository.Delete(deleteItemId, userId)
 }

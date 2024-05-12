@@ -3,8 +3,10 @@ package main
 import (
 	"github.com/gin-gonic/gin"
 
-	"flea-market/controllers"
 	"flea-market/infra"
+
+	"flea-market/controllers"
+	"flea-market/middlewares"
 
 	// "flea-market/models"
 	"flea-market/repositories"
@@ -31,14 +33,16 @@ func main() {
 
 	r := gin.Default()
 
-	itemRouter := r.Group("/items")
-	itemRouter.GET("", itemController.FindAll)
-	itemRouter.GET("/:id", itemController.FindById)
-	itemRouter.POST("", itemController.Create)
-	itemRouter.PUT("/:id", itemController.Update)
-	itemRouter.DELETE("/:id", itemController.Delete)
-
+	// itemRouter := r.Group("/items")
+	itemRouterWithAuth := r.Group("/items", middlewares.AuthMiddleware(authService))
 	authRouter := r.Group("/auth")
+
+	itemRouterWithAuth.GET("", itemController.FindAll)
+	itemRouterWithAuth.GET("/:id", itemController.FindById)
+	itemRouterWithAuth.POST("", itemController.Create)
+	itemRouterWithAuth.PUT("/:id", itemController.Update)
+	itemRouterWithAuth.DELETE("/:id", itemController.Delete)
+
 	authRouter.POST("/sinup", authController.SignUp)
 	authRouter.POST("/login", authController.LogIn)
 
