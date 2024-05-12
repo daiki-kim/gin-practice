@@ -124,6 +124,31 @@ func TestCreate(t *testing.T) {
 	assert.Equal(t, uint(4), res["data"].ID)
 }
 
+func TestUpdate(t *testing.T) {
+	router := setup()
+
+	token, err := services.CreateToken(1, "test1@example.com")
+	assert.Equal(t, nil, err)
+
+	updateName := "update item 1"
+
+	updateItemInput := dto.UpdateItemInput{
+		Name: &updateName,
+	}
+	requestBody, _ := json.Marshal(updateItemInput)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("PUT", "/items/1", bytes.NewBuffer(requestBody))
+	req.Header.Set("Authorization", "Bearer "+*token)
+	router.ServeHTTP(w, req)
+
+	var res map[string]models.Item
+	json.Unmarshal([]byte(w.Body.String()), &res)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.Equal(t, updateName, res["data"].Name)
+}
+
 /*
 error tests
 */
