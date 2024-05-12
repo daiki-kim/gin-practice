@@ -15,6 +15,7 @@ import (
 	"flea-market/services"
 )
 
+// main_test.goで使うためにrouter settingを関数化
 func setupRouter(db *gorm.DB) *gin.Engine {
 	// IItemMemoryRepository := repositories.NewItemMemoryRepository(items)
 	itemRepository := repositories.NewItemRepository(db)
