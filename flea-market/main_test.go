@@ -163,6 +163,23 @@ func TestDelete(t *testing.T) {
 	assert.Equal(t, http.StatusOK, w.Code)
 }
 
+func TestSignUp(t *testing.T) {
+	router := setup()
+
+	newTestUserInput := dto.SignUpUserInput{
+		Email:    "test3@example.com",
+		Password: "test3password",
+	}
+
+	requestBody, _ := json.Marshal(newTestUserInput)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/auth/signup", bytes.NewBuffer(requestBody))
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusCreated, w.Code)
+}
+
 /*
 error tests
 */

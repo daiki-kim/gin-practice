@@ -39,7 +39,7 @@ func setupRouter(db *gorm.DB) *gin.Engine {
 	itemRouterWithAuth.PUT("/:id", itemController.Update)
 	itemRouterWithAuth.DELETE("/:id", itemController.Delete)
 
-	authRouter.POST("/sinup", authController.SignUp)
+	authRouter.POST("/signup", authController.SignUp)
 	authRouter.POST("/login", authController.LogIn)
 
 	return r
