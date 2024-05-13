@@ -21,7 +21,7 @@ import (
 )
 
 func TestMain(m *testing.M) { // "Test~()"がテスト関数として認識される
-	if err := godotenv.Load(".env.test"); err != nil { //  テスト用の`.env.test`を読み込み環境変数として保存
+	if err := godotenv.Load(".env.test"); err != nil { //  テスト用の`.env.test`を読み込み`ENV`を環境変数として保存
 		log.Fatalln("Error loading .env.test file")
 	}
 	code := m.Run() // ファイル内のテスト関数が全て呼び出される
@@ -60,7 +60,7 @@ func setup() *gin.Engine {
 }
 
 /*
-tests without authorization
+test without authorization
 */
 func TestFindAll(t *testing.T) {
 	router := setup()
@@ -147,6 +147,20 @@ func TestUpdate(t *testing.T) {
 
 	assert.Equal(t, http.StatusOK, w.Code)
 	assert.Equal(t, updateName, res["data"].Name)
+}
+
+func TestDelete(t *testing.T) {
+	router := setup()
+
+	token, err := services.CreateToken(1, "test1@example.com")
+	assert.Equal(t, nil, err)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("DELETE", "/items/1", nil)
+	req.Header.Set("Authorization", "Bearer "+*token)
+	router.ServeHTTP(w, req)
+
+	assert.Equal(t, http.StatusOK, w.Code)
 }
 
 /*
