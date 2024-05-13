@@ -12,6 +12,7 @@ import (
 	"github.com/goccy/go-json"
 	"github.com/joho/godotenv"
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 
 	"flea-market/dto"
@@ -36,9 +37,12 @@ func setupTestData(db *gorm.DB) {
 		{Name: "test item 3", Price: 3000, Description: "test3", SoldOut: false, UserID: 2},
 	}
 
+	hashedPassword1, _ := bcrypt.GenerateFromPassword([]byte("test1password"), bcrypt.DefaultCost)
+	hashedPassword2, _ := bcrypt.GenerateFromPassword([]byte("test2password"), bcrypt.DefaultCost)
+
 	users := []models.User{
-		{Email: "test1@example.com", Password: "test1pass"},
-		{Email: "test2@example.com", Password: "test2pass"},
+		{Email: "test1@example.com", Password: string(hashedPassword1)},
+		{Email: "test2@example.com", Password: string(hashedPassword2)},
 	}
 
 	for _, user := range users {
@@ -178,6 +182,26 @@ func TestSignUp(t *testing.T) {
 	router.ServeHTTP(w, req)
 
 	assert.Equal(t, http.StatusCreated, w.Code)
+}
+
+func TestLogIn(t *testing.T) {
+	router := setup()
+
+	loginTestUserInput := dto.LogInUserInput{
+		Email:    "test1@example.com",
+		Password: "test1password",
+	}
+	requestBody, _ := json.Marshal(loginTestUserInput)
+
+	w := httptest.NewRecorder()
+	req, _ := http.NewRequest("POST", "/auth/login", bytes.NewBuffer(requestBody))
+	router.ServeHTTP(w, req)
+
+	var res map[string]string
+	json.Unmarshal([]byte(w.Body.String()), &res)
+
+	assert.Equal(t, http.StatusOK, w.Code)
+	assert.NotNil(t, res["token"])
 }
 
 /*
